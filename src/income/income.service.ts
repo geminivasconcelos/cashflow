@@ -130,7 +130,7 @@ export class IncomeService {
     }
   }
 
-    async findByUserAndYear(userId: number, year: string) {
+  async findByUserAndYear(userId: number, year: string) {
     this.logger.log(`Finding incomes for user ${userId} and year ${year}`);
     try {
       const incomes = await this.incomeRepository.find({
