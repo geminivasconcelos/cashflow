@@ -130,6 +130,25 @@ export class IncomeService {
     }
   }
 
+    async findByUserAndYear(userId: number, year: string) {
+    this.logger.log(`Finding incomes for user ${userId} and year ${year}`);
+    try {
+      const incomes = await this.incomeRepository.find({
+        where: { userId, referenceYear: year },
+      });
+      return {
+        message: 'Incomes retrieved successfully',
+        incomes,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error finding incomes for user ${userId} and year ${year}`,
+        error,
+      );
+      throw new Error('Failed to retrieve incomes');
+    }
+  }
+
   async findByUserAndMonthAndYear(userId: number, month: string, year: string) {
     try {
       this.logger.log(
