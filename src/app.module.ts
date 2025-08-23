@@ -1,3 +1,5 @@
+import { IncomeModule } from './income/income.module';
+import { IncomeController } from './income/income.controller';
 import { AuthService } from './auth/auth.service';
 import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
@@ -10,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    IncomeModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -24,7 +27,7 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true,
     }),
     UserModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AuthService, AppService],
