@@ -1,3 +1,4 @@
+import { MailModule } from './mail/mail.module';
 import { SavingsModule } from './savings/savings.module';
 import { SavingsController } from './savings/savings.controller';
 import { VariableExpenseModule } from './variable-expense/variable-expenses.module';
@@ -11,9 +12,14 @@ import { User } from './user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { Income } from './income/income.entity';
+import { FixedExpenses } from './fixed-expenses/fixed-expenses.entity';
+import { VariableExpenses } from './variable-expense/variable-expenses.entity';
+import { Savings } from './savings/savings.entity';
 
 @Module({
   imports: [
+    MailModule,
     SavingsModule,
     VariableExpenseModule,
     FixedExpensesModule,
@@ -28,7 +34,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME,
       password: String(process.env.DB_PASSWORD),
       database: process.env.DB_NAME,
-      entities: [User],
+      entities: [User, Income, FixedExpenses, VariableExpenses, Savings],
       synchronize: true,
     }),
     UserModule,
