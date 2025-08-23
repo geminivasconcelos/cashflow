@@ -130,6 +130,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import * as crypto from 'crypto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -138,9 +139,9 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly mailService: MailService,
   ) {}
 
-  // Função para gerar MD5
   private md5Hash(password: string): string {
     return crypto.createHash('md5').update(password).digest('hex');
   }
@@ -152,6 +153,8 @@ export class UserService {
         ...user,
         password: hashedPassword,
       });
+        await this.mailService.sendAccountCreatedEmail(newUser.email, newUser.name);
+
       return await this.userRepository.save(newUser);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -226,7 +229,6 @@ export class UserService {
       throw new UnauthorizedException('Usuário não encontrado');
     }
 
-    
     const match = user.password === this.md5Hash(password);
     if (!match) {
       throw new UnauthorizedException('Senha incorreta');
