@@ -9,7 +9,10 @@ export class CreateSavingsDto {
   @IsNotEmpty()
   amount: number;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   userId: number;
+
+  @IsString()
+  category: string;
 }

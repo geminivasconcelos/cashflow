@@ -6,4 +6,7 @@ export class UpdateSavingsDto {
 
   @IsNumber()
   amount: number;
+
+  @IsString()
+  category: string;
 }
