@@ -8,22 +8,22 @@ export class FixedExpenses {
   @Column({ name: 'uuid', default: () => 'gen_random_uuid()' })
   uuid: string;
 
-  @Column()
+  @Column({name: 'description'})
   description: string;
 
-  @Column()
+  @Column({name: 'amount'})
   amount: number;
 
-  @Column()
+  @Column({name: 'category'})
   category: string;
 
-  @Column()
+  @Column({name: 'user_id'})
   userId: number;
 
-  @Column()
+  @Column({name: 'reference_year'})
   referenceYear: string;
 
-  @Column()
+  @Column({name: 'reference_month'})
   referenceMonth: string;
 
   @Column({ name: 'created_in', default: () => 'CURRENT_TIMESTAMP' })
