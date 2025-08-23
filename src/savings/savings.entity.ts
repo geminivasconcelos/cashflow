@@ -5,14 +5,17 @@ export class Savings {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({ name: 'uuid', default: () => 'gen_random_uuid()' })
+  uuid: string;
 
   @Column({ name: 'description', nullable: true })
   description: string;
 
   @Column({ name: 'amount' })
   amount: number;
+
+  @Column({ name: 'category', nullable: true })
+  category: string;
 
   @Column({ name: 'user_id' })
   userId: number;
