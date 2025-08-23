@@ -56,13 +56,17 @@ export class IncomeController {
     return this.incomeService.findByUserAndMonth(userId, month);
   }
 
-   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/month/:month')
-  findByUserAndMonthAndYear(
+  @UseGuards(JwtAuthGuard)
+  @Get('user/:userId/year/:year')
+  findByUserAndYear(
     @Param('userId') userId: number,
-    @Param('month') month: string,
     @Param('year') year: string,
   ) {
+    return this.incomeService.findByUserAndYear(userId, year);
+  }
+
+  @Get('user/:userId/month/:month/year/:year')
+  findByUserAndMonthAndYear(@Param('userId') userId: number, @Param('month') month: string, @Param('year') year: string) {
     return this.incomeService.findByUserAndMonthAndYear(userId, month, year);
   }
 
