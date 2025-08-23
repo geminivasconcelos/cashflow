@@ -1,6 +1,8 @@
+import { SavingsModule } from './savings/savings.module';
+import { SavingsController } from './savings/savings.controller';
+import { VariableExpenseModule } from './variable-expense/variable-expenses.module';
+import { FixedExpensesModule } from './fixed-expenses/fixed-expenses.module';
 import { IncomeModule } from './income/income.module';
-import { IncomeController } from './income/income.controller';
-import { AuthService } from './auth/auth.service';
 import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -12,6 +14,9 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    SavingsModule,
+    VariableExpenseModule,
+    FixedExpensesModule,
     IncomeModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -30,6 +35,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AuthService, AppService],
+  providers: [AppService],
 })
 export class AppModule {}
