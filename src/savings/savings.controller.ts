@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { SavingsService } from './savings.service';
 import { CreateSavingsDto } from './dto/create-savings.dto';
@@ -17,28 +18,28 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class SavingsController {
   constructor(private readonly savingsService: SavingsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createSavingsDto: CreateSavingsDto) {
-    return this.savingsService.create(createSavingsDto);
+  createSavings(@Request() req, @Body() createSavingsDto: CreateSavingsDto) {
+    return this.savingsService.create(req.user.id, createSavingsDto);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() updateSavingsDto: UpdateSavingsDto) {
-    return this.savingsService.update(id, updateSavingsDto);
+  @Patch('savings/:id')
+  updateSavings(@Request() req, @Param('id') id: number, @Body() updateSavingsDto: UpdateSavingsDto) {
+    return this.savingsService.update(req.user.id, id, updateSavingsDto);
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.savingsService.remove(id);
+  deleteSavings(@Request() req, @Param('id') id: number) {
+    return this.savingsService.remove(req.user.id, id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.savingsService.findAll();
+  findAll(@Request() req) {
+    return this.savingsService.findByUser(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,61 +49,54 @@ export class SavingsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId')
-  findByUser(@Param('userId') userId: number) {
-    return this.savingsService.findByUser(userId);
+  @Get('year/:year')
+  findByYear(@Request() req, @Param('year') year: number) {
+    return this.savingsService.findByUserAndYear(req.user.id, year);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/year/:year')
-  findByUserAndYear(
-    @Param('userId') userId: number,
-    @Param('year') year: number,
-  ) {
-    return this.savingsService.findByUserAndYear(userId, year);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/month/:month/year/:year')
-  findByUserAndMonth(
-    @Param('userId') userId: number,
+  @Get('month/:month/year/:year')
+  findByMonthAndYear(
+    @Request() req,
     @Param('month') month: string,
     @Param('year') year: string,
   ) {
-    return this.savingsService.findByUserAndMonthAndYear(userId, month, year);
+    return this.savingsService.findByUserAndMonthAndYear(
+      req.user.id,
+      month,
+      year,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('total/user/:userId')
-  findTotalByUser(@Param('userId') userId: number) {
-    return this.savingsService.findTotalByUser(userId);
+  @Get('total')
+  findTotal(@Request() req) {
+    return this.savingsService.findTotalByUser(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('total/user/:userId/month/:month')
-  findTotalByUserAndMonth(
-    @Param('userId') userId: number,
-    @Param('month') month: string,
-  ) {
-    return this.savingsService.findTotalByUserAndMonth(userId, month);
+  @Get('total/month/:month')
+  findTotalByMonth(@Request() req, @Param('month') month: string) {
+    return this.savingsService.findTotalByUserAndMonth(req.user.id, month);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('total/user/:userId/year/:year')
-  findTotalByUserAndYear(
-    @Param('userId') userId: number,
-    @Param('year') year: string,
-  ) {
-    return this.savingsService.findTotalByUserAndYear(userId, year);
+  @Get('total/year/:year')
+  findTotalByYear(@Request() req, @Param('year') year: string) {
+    return this.savingsService.findTotalByUserAndYear(req.user.id, year);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('total/user/:userId/month/:month/year/:year')
-  findTotalByUserAndMonthAndYear(
-    @Param('userId') userId: number,
+  @Get('total/month/:month/year/:year')
+  findTotalByMonthAndYear(
+    @Request() req,
     @Param('month') month: string,
     @Param('year') year: string,
   ) {
-    return this.savingsService.findTotalByUserAndMonthAndYear(userId, month, year);
+    return this.savingsService.findTotalByUserAndMonthAndYear(
+      req.user.id,
+      month,
+      year,
+    );
   }
 }

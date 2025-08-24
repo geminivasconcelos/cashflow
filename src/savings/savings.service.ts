@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { Savings } from './savings.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -14,48 +14,81 @@ export class SavingsService {
     private readonly savingsRepository: Repository<Savings>,
   ) {}
 
-  create(createSavingsDto: CreateSavingsDto) {
-    this.logger.log('Creating a new savings entry');
+  async create(userId: number, createSavingsDto: CreateSavingsDto) {
+    this.logger.log(`Creating a new savings entry for user ${userId}`);
 
-    const newSavingsEntry = this.savingsRepository.create(createSavingsDto);
-    return this.savingsRepository
-      .save(newSavingsEntry)
-      .then((savingsEntry) => ({
+    try {
+      const newSavingsEntry = this.savingsRepository.create({
+        ...createSavingsDto,
+        userId,
+      });
+      const savingsEntry = await this.savingsRepository.save(newSavingsEntry);
+
+      return {
         message: 'Savings entry created successfully',
         savingsEntry,
-      }))
-      .catch((error) => {
-        this.logger.error('Error creating savings entry', error);
-        throw error;
-      });
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error creating savings entry for user ${userId}`,
+        error,
+      );
+      throw new InternalServerErrorException('Failed to create savings entry');
+    }
   }
 
-  update(id: number, updateSavingsDto: UpdateSavingsDto) {
-    this.logger.log(`Updating savings entry with id ${id}`);
+  async update(userId: number, id: number, updateSavingsDto: UpdateSavingsDto) {
+    this.logger.log(`Updating savings entry ${id} for user ${userId}`);
 
-    return this.savingsRepository
-      .update(id, updateSavingsDto)
-      .then(() => ({
-        message: 'Savings entry updated successfully',
-      }))
-      .catch((error) => {
-        this.logger.error('Error updating savings entry', error);
-        throw error;
+    try {
+      const savingsEntry = await this.savingsRepository.findOne({
+        where: { id, userId },
       });
+
+      if (!savingsEntry) {
+        throw new NotFoundException(
+          `Savings entry with id ${id} not found for this user`,
+        );
+      }
+
+      await this.savingsRepository.update(id, updateSavingsDto);
+
+      return { message: 'Savings entry updated successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Error updating savings entry ${id} for user ${userId}`,
+        error,
+      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to update savings entry');
+    }
   }
 
-  remove(id: number) {
-    this.logger.log(`Removing savings entry with id ${id}`);
+  async remove(userId: number, id: number) {
+    this.logger.log(`Removing savings entry ${id} for user ${userId}`);
 
-    return this.savingsRepository
-      .delete(id)
-      .then(() => ({
-        message: 'Savings entry removed successfully',
-      }))
-      .catch((error) => {
-        this.logger.error('Error removing savings entry', error);
-        throw error;
+    try {
+      const savingsEntry = await this.savingsRepository.findOne({
+        where: { id, userId },
       });
+
+      if (!savingsEntry) {
+        throw new NotFoundException(
+          `Savings entry with id ${id} not found for this user`,
+        );
+      }
+
+      await this.savingsRepository.delete(id);
+
+      return { message: 'Savings entry removed successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Error removing savings entry ${id} for user ${userId}`,
+        error,
+      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to remove savings entry');
+    }
   }
 
   findAll() {
