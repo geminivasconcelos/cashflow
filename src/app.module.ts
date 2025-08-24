@@ -1,3 +1,5 @@
+import { LiabilitiesModule } from './liabilities/liabilities.module';
+import { LiabilitiesController } from './liabilities/liabilities.controller';
 import { MailModule } from './mail/mail.module';
 import { SavingsModule } from './savings/savings.module';
 import { SavingsController } from './savings/savings.controller';
@@ -19,6 +21,7 @@ import { Savings } from './savings/savings.entity';
 
 @Module({
   imports: [
+        LiabilitiesModule, 
     MailModule,
     SavingsModule,
     VariableExpenseModule,
