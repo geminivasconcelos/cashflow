@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
@@ -25,8 +26,8 @@ export class IncomeController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.incomeService.findAll();
+  findAllByUser(@Request() req) {
+    return this.incomeService.findAllByUser(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -36,49 +37,46 @@ export class IncomeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId')
-  findByUser(@Param('userId') userId: number) {
-    return this.incomeService.findByUser(userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Get('category/:category')
-  findByCategory(@Param('category') category: string) {
-    return this.incomeService.findByCategory(category);
+  findByCategory(@Request() req, @Param('category') category: string) {
+    return this.incomeService.findByUserAndCategory(req.user.id, category);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/month/:month')
-  findByUserAndMonth(
-    @Param('userId') userId: number,
+  @Get('month/:month')
+  findByMonth(@Request() req, @Param('month') month: string) {
+    return this.incomeService.findByUserAndMonth(req.user.id, month);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('year/:year')
+  findByYear(@Request() req, @Param('year') year: string) {
+    return this.incomeService.findByUserAndYear(req.user.id, year);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month/year/:year')
+  findByMonthAndYear(
+    @Request() req,
     @Param('month') month: string,
-  ) {
-    return this.incomeService.findByUserAndMonth(userId, month);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/year/:year')
-  findByUserAndYear(
-    @Param('userId') userId: number,
     @Param('year') year: string,
   ) {
-    return this.incomeService.findByUserAndYear(userId, year);
-  }
-
-  @Get('user/:userId/month/:month/year/:year')
-  findByUserAndMonthAndYear(@Param('userId') userId: number, @Param('month') month: string, @Param('year') year: string) {
-    return this.incomeService.findByUserAndMonthAndYear(userId, month, year);
+    return this.incomeService.findByUserAndMonthAndYear(
+      req.user.id,
+      month,
+      year,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:userId/month/:month/category/:category')
-  findByUserAndMonthAndCategory(
-    @Param('userId') userId: number,
+  @Get('month/:month/category/:category')
+  findByMonthAndCategory(
+    @Request() req,
     @Param('month') month: string,
     @Param('category') category: string,
   ) {
     return this.incomeService.findByUserAndMonthAndCategory(
-      userId,
+      req.user.id,
       month,
       category,
     );
@@ -86,13 +84,17 @@ export class IncomeController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateIncomeDto: UpdateIncomeDto) {
-    return this.incomeService.update(id, updateIncomeDto);
+  update(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() updateIncomeDto: UpdateIncomeDto,
+  ) {
+    return this.incomeService.update(req.user.id, id, updateIncomeDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  delete(@Param('id') id: number) {
-    return this.incomeService.delete(id);
+  delete(@Request() req, @Param('id') id: number) {
+    return this.incomeService.delete(req.user.id, id);
   }
 }

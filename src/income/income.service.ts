@@ -35,32 +35,58 @@ export class IncomeService {
       });
   }
 
-  update(id: number, updateIncomeDto: UpdateIncomeDto) {
-    this.logger.log('Updating income');
+  async update(userId: number, id: number, updateIncomeDto: UpdateIncomeDto) {
+    this.logger.log(`Updating income ${id} for user ${userId}`);
 
-    return this.incomeRepository
-      .update(id, updateIncomeDto)
-      .then(() => ({
-        message: 'Income updated successfully',
-      }))
-      .catch((error) => {
-        this.logger.error('Error updating income', error);
-        throw error;
+    try {
+      const income = await this.incomeRepository.findOne({
+        where: { id, userId },
       });
+
+      if (!income) {
+        throw new NotFoundException(
+          `Income record with id ${id} not found for this user`,
+        );
+      }
+
+      await this.incomeRepository.update(id, updateIncomeDto);
+
+      return { message: 'Income updated successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Error updating income ${id} for user ${userId}`,
+        error,
+      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to update income');
+    }
   }
 
-  delete(id: number) {
-    this.logger.log('Deleting income');
+  async delete(userId: number, id: number) {
+    this.logger.log(`Deleting income ${id} for user ${userId}`);
 
-    return this.incomeRepository
-      .delete(id)
-      .then(() => ({
-        message: 'Income deleted successfully',
-      }))
-      .catch((error) => {
-        this.logger.error('Error deleting income', error);
-        throw error;
+    try {
+      const income = await this.incomeRepository.findOne({
+        where: { id, userId },
       });
+
+      if (!income) {
+        throw new NotFoundException(
+          `Income record with id ${id} not found for this user`,
+        );
+      }
+
+      await this.incomeRepository.delete(id);
+
+      return { message: 'Income deleted successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Error deleting income ${id} for user ${userId}`,
+        error,
+      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to delete income');
+    }
   }
 
   findAll() {
@@ -78,8 +104,8 @@ export class IncomeService {
       });
   }
 
-  async findById(id: number) {
-    this.logger.log(`Finding income with id ${id}`);
+  async findAllByUser(id: number) {
+    this.logger.log(`Finding all incomes for user with id ${id}`);
 
     try {
       const income = await this.incomeRepository.findOne({ where: { id } });
@@ -106,9 +132,11 @@ export class IncomeService {
     return this.incomeRepository.find({ where: { userId: id } });
   }
 
-  findByCategory(category: string) {
-    this.logger.log(`Finding incomes for category ${category}`);
-    return this.incomeRepository.find({ where: { category } });
+  findByUserAndCategory(userId: number, category: string) {
+    this.logger.log(
+      `Finding incomes for user ${userId} and category ${category}`,
+    );
+    return this.incomeRepository.find({ where: { userId, category } });
   }
 
   async findByUserAndMonth(userId: number, month: string) {
