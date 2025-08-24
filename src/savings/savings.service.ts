@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Savings } from './savings.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -106,27 +111,37 @@ export class SavingsService {
       });
   }
 
-  findOne(id: number) {
-    this.logger.log(`Retrieving savings entry with id ${id}`);
+  async findOneByUser(id: number, userId: number) {
+    this.logger.log(`Retrieving savings entry ${id} for user ${userId}`);
 
-    return this.savingsRepository
-      .findOne({ where: { id } })
-      .then((savingsEntry) => {
-        if (!savingsEntry) {
-          throw new Error('Savings entry not found');
-        }
-        return {
-          message: 'Savings entry retrieved successfully',
-          savingsEntry,
-        };
-      })
-      .catch((error) => {
-        this.logger.error('Error retrieving savings entry', error);
-        throw error;
+    try {
+      const savingsEntry = await this.savingsRepository.findOne({
+        where: { id, userId },
       });
+
+      if (!savingsEntry) {
+        throw new NotFoundException(
+          `Savings entry with id ${id} not found for this user`,
+        );
+      }
+
+      return {
+        message: 'Savings entry retrieved successfully',
+        savingsEntry,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving savings entry ${id} for user ${userId}`,
+        error,
+      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Failed to retrieve savings entry',
+      );
+    }
   }
 
-  findByUser(userId: number) {
+  findAllByUser(userId: number) {
     this.logger.log(`Retrieving savings entries for user with id ${userId}`);
 
     return this.savingsRepository

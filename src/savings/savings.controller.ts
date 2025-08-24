@@ -25,10 +25,13 @@ export class SavingsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('savings/:id')
-  updateSavings(@Request() req, @Param('id') id: number, @Body() updateSavingsDto: UpdateSavingsDto) {
+  updateSavings(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() updateSavingsDto: UpdateSavingsDto,
+  ) {
     return this.savingsService.update(req.user.id, id, updateSavingsDto);
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -38,14 +41,13 @@ export class SavingsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Request() req) {
-    return this.savingsService.findByUser(req.user.id);
+  findAllByUser(@Request() req) {
+    return this.savingsService.findAllByUser(req.user.id);
   }
-
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.savingsService.findOne(id);
+  findOne(@Request() req, @Param('id') id: number) {
+    return this.savingsService.findOneByUser(id, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
