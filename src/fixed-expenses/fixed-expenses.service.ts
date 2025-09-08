@@ -13,50 +13,66 @@ export class FixedExpensesService {
     private readonly fixedExpensesRepository: Repository<FixedExpenses>,
   ) {}
 
-  create(createFixedExpensesDto: CreateFixedExpensesDto) {
-    this.logger.log('Creating a new fixed expense');
+create(userId: number, createFixedExpensesDto: CreateFixedExpensesDto) {
+  this.logger.log(`Creating a new fixed expense for user ${userId}`);
 
-    const newFixedExpense = this.fixedExpensesRepository.create(
-      createFixedExpensesDto,
-    );
-    return this.fixedExpensesRepository
-      .save(newFixedExpense)
-      .then((fixedExpense) => ({
-        message: 'Fixed expense created successfully',
-        fixedExpense,
-      }))
-      .catch((error) => {
-        this.logger.error('Error creating fixed expense', error);
-        throw error;
-      });
+  const newFixedExpense = this.fixedExpensesRepository.create({
+    ...createFixedExpensesDto,
+    userId,
+  });
+  return this.fixedExpensesRepository
+    .save(newFixedExpense)
+    .then((fixedExpense) => ({
+      message: 'Fixed expense created successfully',
+      fixedExpense,
+    }))
+    .catch((error) => {
+      this.logger.error('Error creating fixed expense', error);
+      throw error;
+    });
   }
 
-  update(id: number, updateFixedExpensesDto: UpdateFixedExpensesDto) {
-    this.logger.log(`Updating fixed expense with id ${id}`);
+  update(
+    userId: number,
+    id: number,
+    updateFixedExpensesDto: UpdateFixedExpensesDto,
+  ) {
+    this.logger.log(`Updating fixed expense with id ${id} for user ${userId}`);
 
     return this.fixedExpensesRepository
-      .update(id, updateFixedExpensesDto)
-      .then(() => ({
-        message: 'Fixed expense updated successfully',
-      }))
+      .update({ id, userId }, updateFixedExpensesDto)
+      .then((result) => {
+        if (result.affected === 0) {
+          return {
+            message: 'Fixed expense not found or does not belong to user',
+          };
+        }
+        return { message: 'Fixed expense updated successfully' };
+      })
       .catch((error) => {
         this.logger.error('Error updating fixed expense', error);
         throw error;
       });
   }
 
-  remove(id: number) {
-    this.logger.log(`Removing fixed expense with id ${id}`);
+  async remove(userId: number, id: number) {
+    this.logger.log(`Removing fixed expense with id ${id} for user ${userId}`);
 
-    return this.fixedExpensesRepository
-      .delete(id)
-      .then(() => ({
-        message: 'Fixed expense removed successfully',
-      }))
-      .catch((error) => {
-        this.logger.error('Error removing fixed expense', error);
-        throw error;
-      });
+    try {
+      const result = await this.fixedExpensesRepository.delete({ id, userId });
+      if (result.affected === 0) {
+        return {
+          message: 'Fixed expense not found or does not belong to user',
+        };
+      }
+      return { message: 'Fixed expense removed successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Error removing fixed expense ${id} for user ${userId}`,
+        error,
+      );
+      throw error;
+    }
   }
 
   findAll() {
@@ -96,6 +112,42 @@ export class FixedExpensesService {
 
   findByUser(userId: number) {
     this.logger.log(`Retrieving fixed expenses for user with id ${userId}`);
+
+    return this.fixedExpensesRepository
+      .find({ where: { userId } })
+      .then((fixedExpenses) => ({
+        message: 'Fixed expenses retrieved successfully',
+        fixedExpenses,
+      }))
+      .catch((error) => {
+        this.logger.error('Error retrieving fixed expenses by user', error);
+        throw error;
+      });
+  }
+
+  findOneByUser(userId: number, id: number) {
+    this.logger.log(
+      `Retrieving fixed expense with id ${id} for user with id ${userId}`,
+    );
+    return this.fixedExpensesRepository
+      .findOne({ where: { userId, id } })
+      .then((fixedExpense) => {
+        if (!fixedExpense) {
+          return { message: 'Fixed expense not found' };
+        }
+        return {
+          message: 'Fixed expense retrieved successfully',
+          fixedExpense,
+        };
+      })
+      .catch((error) => {
+        this.logger.error('Error retrieving fixed expense', error);
+        throw error;
+      });
+  }
+
+  findAllByUser(userId: number) {
+    this.logger.log(`Retrieving all fixed expenses for user with id ${userId}`);
 
     return this.fixedExpensesRepository
       .find({ where: { userId } })
@@ -183,7 +235,9 @@ export class FixedExpensesService {
   }
 
   findByUserAndYear(userId: number, year: string) {
-    this.logger.log(`Retrieving fixed expenses for user with id ${userId}, year ${year}`);
+    this.logger.log(
+      `Retrieving fixed expenses for user with id ${userId}, year ${year}`,
+    );
 
     return this.fixedExpensesRepository
       .find({ where: { userId, referenceYear: String(year) } })
@@ -192,13 +246,18 @@ export class FixedExpensesService {
         fixedExpenses,
       }))
       .catch((error) => {
-        this.logger.error('Error retrieving fixed expenses by user and year', error);
+        this.logger.error(
+          'Error retrieving fixed expenses by user and year',
+          error,
+        );
         throw error;
       });
   }
 
   findByUserAndMonth(userId: number, month: string) {
-    this.logger.log(`Retrieving fixed expenses for user with id ${userId}, month ${month}`);
+    this.logger.log(
+      `Retrieving fixed expenses for user with id ${userId}, month ${month}`,
+    );
 
     return this.fixedExpensesRepository
       .find({ where: { userId, referenceMonth: String(month) } })
@@ -207,7 +266,10 @@ export class FixedExpensesService {
         fixedExpenses,
       }))
       .catch((error) => {
-        this.logger.error('Error retrieving fixed expenses by user and month', error);
+        this.logger.error(
+          'Error retrieving fixed expenses by user and month',
+          error,
+        );
         throw error;
       });
   }

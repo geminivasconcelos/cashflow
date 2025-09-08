@@ -6,97 +6,107 @@ import {
   Param,
   Patch,
   Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateFixedExpensesDto } from './dto/create-fixed-expenses.dto';
 import { UpdateFixedExpensesDto } from './dto/update-fixed-expenses.dto';
 import { FixedExpensesService } from './fixed-expenses.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('fixed-expenses')
 export class FixedExpensesController {
   constructor(private readonly fixedExpensesService: FixedExpensesService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createFixedExpensesDto: CreateFixedExpensesDto) {
-    return this.fixedExpensesService.create(createFixedExpensesDto);
+  create(
+    @Request() req,
+    @Body() createFixedExpensesDto: CreateFixedExpensesDto,
+  ) {
+    return this.fixedExpensesService.create(
+      req.user.id,
+      createFixedExpensesDto,
+    );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
+    @Request() req,
     @Param('id') id: number,
     @Body() updateFixedExpensesDto: UpdateFixedExpensesDto,
   ) {
-    return this.fixedExpensesService.update(id, updateFixedExpensesDto);
+    return this.fixedExpensesService.update(
+      req.user.id,
+      id,
+      updateFixedExpensesDto,
+    );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.fixedExpensesService.remove(id);
+  remove(@Request() req, @Param('id') id: number) {
+    return this.fixedExpensesService.remove(req.user.id, id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.fixedExpensesService.findOne(id);
+  findOne(@Request() req, @Param('id') id: number) {
+    return this.fixedExpensesService.findOneByUser(req.user.id, id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.fixedExpensesService.findAll();
+  findAll(@Request() req) {
+    return this.fixedExpensesService.findAllByUser(req.user.id);
   }
 
-  @Get('user/:userId')
-  findByUser(@Param('userId') userId: number) {
-    return this.fixedExpensesService.findByUser(userId);
-  }
-
-  @Get('user/:userId/month/:month/year/:year')
-  findByUserAndMonthAndYear(
-    @Param('userId') userId: number,
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month/year/:year')
+  findByMonthAndYear(
+    @Request() req,
     @Param('month') month: string,
     @Param('year') year: string,
   ) {
     return this.fixedExpensesService.findByUserAndMonthAndYear(
-      userId,
+      req.user.id,
       month,
       year,
     );
   }
 
-  @Get('user/:userId/month/:month/year/:year/category/:category')
-  findByUserAndMonthAndYearAndCategory(
-    @Param('userId') userId: number,
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month/year/:year/category/:category')
+  findByMonthAndYearAndCategory(
+    @Request() req,
     @Param('month') month: string,
     @Param('year') year: string,
     @Param('category') category: string,
   ) {
     return this.fixedExpensesService.findByUserAndMonthAndYearAndCategory(
-      userId,
+      req.user.id,
       month,
       year,
       category,
     );
   }
 
-  @Get('user/:userId/category/:category')
-  findByCategory(
-    @Param('userId') userId: number,
-    @Param('category') category: string,
-  ) {
-    return this.fixedExpensesService.findByCategory(userId, category);
+  @UseGuards(JwtAuthGuard)
+  @Get('category/:category')
+  findByCategory(@Request() req, @Param('category') category: string) {
+    return this.fixedExpensesService.findByCategory(req.user.id, category);
   }
 
-  @Get('user/:userId/year/:year')
-  findByUserAndYear(
-    @Param('userId') userId: number,
-    @Param('year') year: string,
-  ) {
-    return this.fixedExpensesService.findByUserAndYear(userId, year);
+  @UseGuards(JwtAuthGuard)
+  @Get('year/:year')
+  findByYear(@Request() req, @Param('year') year: string) {
+    return this.fixedExpensesService.findByUserAndYear(req.user.id, year);
   }
 
-  @Get('user/:userId/month/:month')
-  findByUserAndMonth(
-    @Param('userId') userId: number,
-    @Param('month') month: string,
-  ) {
-    return this.fixedExpensesService.findByUserAndMonth(userId, month);
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month')
+  findByMonth(@Request() req, @Param('month') month: string) {
+    return this.fixedExpensesService.findByUserAndMonth(req.user.id, month);
   }
 }
