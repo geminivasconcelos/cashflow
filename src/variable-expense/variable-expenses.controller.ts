@@ -1,95 +1,101 @@
-
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { VariableExpensesService } from './variable-expenses.service';
 import { CreateVariableExpensesDto } from './dto/create-variable-expenses.dto';
 import { UpdateVariableExpensesDto } from './dto/update-variable-expenses.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller()
+@Controller('variable-expenses')
 export class VariableExpenseController {
-      constructor(private readonly variableExpensesService: VariableExpensesService) {}
-    
-      @Post()
-      create(@Body() createVariableExpensesDto: CreateVariableExpensesDto) {
-        return this.variableExpensesService.create(createVariableExpensesDto);
-      }
-    
-      @Patch(':id')
-      update(
-        @Param('id') id: number,
-        @Body() updateVariableExpensesDto: UpdateVariableExpensesDto,
-      ) {
-        return this.variableExpensesService.update(id, updateVariableExpensesDto);
-      }
-    
-      @Delete(':id')
-      remove(@Param('id') id: number) {
-        return this.variableExpensesService.remove(id);
-      }
-    
-      @Get(':id')
-      findOne(@Param('id') id: number) {
-        return this.variableExpensesService.findOne(id);
-      }
-    
-      @Get()
-      findAll() {
-        return this.variableExpensesService.findAll();
-      }
-    
-      @Get('user/:userId')
-      findByUser(@Param('userId') userId: number) {
-        return this.variableExpensesService.findByUser(userId);
-      }
-    
-      @Get('user/:userId/month/:month/year/:year')
-      findByUserAndMonthAndYear(
-        @Param('userId') userId: number,
-        @Param('month') month: string,
-        @Param('year') year: string,
-      ) {
-        return this.variableExpensesService.findByUserAndMonthAndYear(
-          userId,
-          month,
-          year,
-        );
-      }
-    
-      @Get('user/:userId/month/:month/year/:year/category/:category')
-      findByUserAndMonthAndYearAndCategory(
-        @Param('userId') userId: number,
-        @Param('month') month: string,
-        @Param('year') year: string,
-        @Param('category') category: string,
-      ) {
-        return this.variableExpensesService.findByUserAndMonthAndYearAndCategory(
-          userId,
-          month,
-          year,
-          category,
-        );
-      }
-    
-      @Get('user/:userId/category/:category')
-      findByCategory(
-        @Param('userId') userId: number,
-        @Param('category') category: string,
-      ) {
-        return this.variableExpensesService.findByCategory(userId, category);
-      }
-    
-      @Get('user/:userId/year/:year')
-      findByUserAndYear(
-        @Param('userId') userId: number,
-        @Param('year') year: string,
-      ) {
-        return this.variableExpensesService.findByUserAndYear(userId, year);
-      }
-    
-      @Get('user/:userId/month/:month')
-      findByUserAndMonth(
-        @Param('userId') userId: number,
-        @Param('month') month: string,
-      ) {
-        return this.variableExpensesService.findByUserAndMonth(userId, month);
-      }
-}
+  constructor(private readonly variableExpensesService: VariableExpensesService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  create(@Request() req, @Body() createVariableExpensesDto: CreateVariableExpensesDto) {
+    return this.variableExpensesService.create(req.user.id, createVariableExpensesDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() updateVariableExpensesDto: UpdateVariableExpensesDto,
+  ) {
+    return this.variableExpensesService.update(req.user.id, id, updateVariableExpensesDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Request() req, @Param('id') id: number) {
+    return this.variableExpensesService.remove(req.user.id, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  findOne(@Request() req, @Param('id') id: number) {
+    return this.variableExpensesService.findOneByUser(req.user.id, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  findAll(@Request() req) {
+    return this.variableExpensesService.findAllByUser(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month/year/:year')
+  findByMonthAndYear(
+    @Request() req,
+    @Param('month') month: string,
+    @Param('year') year: string,
+  ) {
+    return this.variableExpensesService.findByUserAndMonthAndYear(
+      req.user.id,
+      month,
+      year,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month/year/:year/category/:category')
+  findByMonthAndYearAndCategory(
+    @Request() req,
+    @Param('month') month: string,
+    @Param('year') year: string,
+    @Param('category') category: string,
+  ) {
+    return this.variableExpensesService.findByUserAndMonthAndYearAndCategory(
+      req.user.id,
+      month,
+      year,
+      category,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('category/:category')
+  findByCategory(
+    @Request() req,
+    @Param('category') category: string,
+  ) {
+    return this.variableExpensesService.findByCategory(req.user.id, category);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('year/:year')
+  findByYear(
+    @Request() req,
+    @Param('year') year: string,
+  ) {
+    return this.variableExpensesService.findByUserAndYear(req.user.id, year);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('month/:month')
+  findByMonth(
+    @Request() req,
+    @Param('month') month: string,
+  ) {
+    return this.variableExpensesService.findByUserAndMonth(req.user.id, month);
+  }
+  }

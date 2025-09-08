@@ -18,12 +18,13 @@ export class VariableExpensesService {
     private readonly variableExpensesRepository: Repository<VariableExpenses>,
   ) {}
 
-  create(createVariableExpensesDto: CreateVariableExpensesDto) {
-    this.logger.log('Creating a new variable expense');
+  create(userId: number, createVariableExpensesDto: CreateVariableExpensesDto) {
+    this.logger.log(`Creating a new variable expense for user ${userId}`);
 
-    const newVariableExpense = this.variableExpensesRepository.create(
-      createVariableExpensesDto,
-    );
+    const newVariableExpense = this.variableExpensesRepository.create({
+      ...createVariableExpensesDto,
+      userId,
+    });
     return this.variableExpensesRepository
       .save(newVariableExpense)
       .then((variableExpense) => ({
@@ -36,28 +37,41 @@ export class VariableExpensesService {
       });
   }
 
-  update(id: number, updateVariableExpensesDto: UpdateVariableExpensesDto) {
-    this.logger.log(`Updating variable expense with id ${id}`);
+  update(
+    userId: number,
+    id: number,
+    updateVariableExpensesDto: UpdateVariableExpensesDto,
+  ) {
+    this.logger.log(
+      `Updating variable expense with id ${id} for user ${userId}`,
+    );
 
     return this.variableExpensesRepository
-      .update(id, updateVariableExpensesDto)
+      .update({ id, userId }, updateVariableExpensesDto)
       .then(() => ({
         message: 'Variable expense updated successfully',
       }))
       .catch((error) => {
-        this.logger.error('Error updating fixed expense', error);
+        this.logger.error('Error updating variable expense', error);
         throw error;
       });
   }
 
-  remove(id: number) {
-    this.logger.log(`Removing variable expense with id ${id}`);
+  remove(userId: number, id: number) {
+    this.logger.log(
+      `Removing variable expense with id ${id} for user ${userId}`,
+    );
 
     return this.variableExpensesRepository
-      .delete(id)
-      .then(() => ({
-        message: 'Variable expense removed successfully',
-      }))
+      .delete({ id, userId })
+      .then((result) => {
+        if (result.affected === 0) {
+          return {
+            message: 'Variable expense not found or does not belong to user',
+          };
+        }
+        return { message: 'Variable expense removed successfully' };
+      })
       .catch((error) => {
         this.logger.error('Error removing variable expense', error);
         throw error;
@@ -110,6 +124,47 @@ export class VariableExpensesService {
       }))
       .catch((error) => {
         this.logger.error('Error retrieving variable expenses by user', error);
+        throw error;
+      });
+  }
+
+  findAllByUser(userId: number) {
+    this.logger.log(
+      `Retrieving all variable expenses for user with id ${userId}`,
+    );
+
+    return this.variableExpensesRepository
+      .find({ where: { userId } })
+      .then((variableExpenses) => ({
+        message: 'Variable expenses retrieved successfully',
+        variableExpenses,
+      }))
+      .catch((error) => {
+        this.logger.error('Error retrieving variable expenses by user', error);
+        throw error;
+      });
+  }
+
+  findOneByUser(userId: number, id: number) {
+    this.logger.log(
+      `Retrieving variable expense with id ${id} for user with id ${userId}`,
+    );
+
+    return this.variableExpensesRepository
+      .findOne({ where: { id, userId } })
+      .then((variableExpense) => {
+        if (!variableExpense) {
+          return {
+            message: 'Variable expense not found or does not belong to user',
+          };
+        }
+        return {
+          message: 'Variable expense retrieved successfully',
+          variableExpense,
+        };
+      })
+      .catch((error) => {
+        this.logger.error('Error retrieving variable expense by user', error);
         throw error;
       });
   }
@@ -182,7 +237,10 @@ export class VariableExpensesService {
         variableExpenses,
       }))
       .catch((error) => {
-        this.logger.error('Error retrieving variable expenses by category', error);
+        this.logger.error(
+          'Error retrieving variable expenses by category',
+          error,
+        );
         throw error;
       });
   }
