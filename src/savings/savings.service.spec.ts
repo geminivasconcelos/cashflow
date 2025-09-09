@@ -284,88 +284,98 @@ describe('SavingsService', () => {
   });
 
   describe('findTotalByUserAndMonth', () => {
-  it('deve retornar o total de savings do usuário no mês', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockResolvedValue({ total: 500 }),
+    it('deve retornar o total de savings do usuário no mês', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: 500 }),
+      });
+
+      const result = await service.findTotalByUserAndMonth(1, '08');
+      expect(result).toEqual({
+        message: 'Total savings retrieved successfully',
+        total: 500,
+      });
     });
 
-    const result = await service.findTotalByUserAndMonth(1, '08');
-    expect(result).toEqual({
-      message: 'Total savings retrieved successfully',
-      total: 500,
-    });
-  });
+    it('deve lançar erro se getRawOne falhar', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
 
-  it('deve lançar erro se getRawOne falhar', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
-    });
-
-    await expect(service.findTotalByUserAndMonth(1, '08')).rejects.toThrow(Error);
-  });
-});
-
-describe('findTotalByUserAndYear', () => {
-  it('deve retornar o total de savings do usuário no ano', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockResolvedValue({ total: 2000 }),
-    });
-
-    const result = await service.findTotalByUserAndYear(1, '2025');
-    expect(result).toEqual({
-      message: 'Total savings retrieved successfully',
-      total: 2000,
+      await expect(service.findTotalByUserAndMonth(1, '08')).rejects.toThrow(
+        Error,
+      );
     });
   });
 
-  it('deve lançar erro se getRawOne falhar', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
+  describe('findTotalByUserAndYear', () => {
+    it('deve retornar o total de savings do usuário no ano', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: 2000 }),
+      });
+
+      const result = await service.findTotalByUserAndYear(1, '2025');
+      expect(result).toEqual({
+        message: 'Total savings retrieved successfully',
+        total: 2000,
+      });
     });
 
-    await expect(service.findTotalByUserAndYear(1, '2025')).rejects.toThrow(Error);
+    it('deve lançar erro se getRawOne falhar', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await expect(service.findTotalByUserAndYear(1, '2025')).rejects.toThrow(
+        Error,
+      );
+    });
   });
-});
 
-describe('findTotalByUserAndMonthAndYear', () => {
-  it('deve retornar o total de savings do usuário no mês e ano', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockResolvedValue({ total: 300 }),
+  describe('findTotalByUserAndMonthAndYear', () => {
+    it('deve retornar o total de savings do usuário no mês e ano', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: 300 }),
+      });
+
+      const result = await service.findTotalByUserAndMonthAndYear(
+        1,
+        '08',
+        '2025',
+      );
+      expect(result).toEqual({
+        message: 'Total savings retrieved successfully',
+        total: 300,
+      });
     });
 
-    const result = await service.findTotalByUserAndMonthAndYear(1, '08', '2025');
-    expect(result).toEqual({
-      message: 'Total savings retrieved successfully',
-      total: 300,
+    it('deve lançar erro se getRawOne falhar', async () => {
+      repository.createQueryBuilder!.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await expect(
+        service.findTotalByUserAndMonthAndYear(1, '08', '2025'),
+      ).rejects.toThrow(Error);
     });
   });
-
-  it('deve lançar erro se getRawOne falhar', async () => {
-    repository.createQueryBuilder!.mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn().mockRejectedValue(new Error('DB error')),
-    });
-
-    await expect(service.findTotalByUserAndMonthAndYear(1, '08', '2025')).rejects.toThrow(Error);
-  });
-});
 
   describe('Métodos extras e branches', () => {
     it('findAll deve retornar array vazio se não houver savings', async () => {
