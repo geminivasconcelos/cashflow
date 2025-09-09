@@ -153,7 +153,10 @@ export class UserService {
         ...user,
         password: hashedPassword,
       });
-        await this.mailService.sendAccountCreatedEmail(newUser.email, newUser.name);
+      await this.mailService.sendAccountCreatedEmail(
+        newUser.email,
+        newUser.name,
+      );
 
       return await this.userRepository.save(newUser);
     } catch (error: unknown) {
@@ -178,6 +181,10 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async findOneEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
   }
 
   getAllUserss() {
@@ -257,5 +264,20 @@ export class UserService {
 
     user.password = this.md5Hash(payload.new_password);
     return this.userRepository.save(user);
+  }
+  async updatePasswordById(userId: number, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    // Atualiza a senha
+    user.password = this.md5Hash(newPassword); // ou bcrypt para mais segurança
+    await this.userRepository.save(user);
+
+    // Retorna os dados do usuário sem a senha
+    const { password, ...userData } = user;
+    return {
+      message: 'Senha atualizada com sucesso',
+      user: userData, // inclui id, email e outros campos, sem a senha
+    };
   }
 }

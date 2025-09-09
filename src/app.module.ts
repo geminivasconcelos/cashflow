@@ -1,3 +1,4 @@
+import { PasswordRecoveryService } from './auth/password-recovery.service';
 import { LiabilitiesModule } from './liabilities/liabilities.module';
 import { LiabilitiesController } from './liabilities/liabilities.controller';
 import { MailModule } from './mail/mail.module';
@@ -18,10 +19,11 @@ import { Income } from './income/income.entity';
 import { FixedExpenses } from './fixed-expenses/fixed-expenses.entity';
 import { VariableExpenses } from './variable-expense/variable-expenses.entity';
 import { Savings } from './savings/savings.entity';
+import { ResetCode } from './auth/reset-code.entity';
 
 @Module({
   imports: [
-        LiabilitiesModule, 
+    LiabilitiesModule,
     MailModule,
     SavingsModule,
     VariableExpenseModule,
@@ -37,7 +39,14 @@ import { Savings } from './savings/savings.entity';
       username: process.env.DB_USERNAME,
       password: String(process.env.DB_PASSWORD),
       database: process.env.DB_NAME,
-      entities: [User, Income, FixedExpenses, VariableExpenses, Savings],
+      entities: [
+        User,
+        Income,
+        FixedExpenses,
+        VariableExpenses,
+        Savings,
+        ResetCode,
+      ],
       synchronize: true,
     }),
     UserModule,

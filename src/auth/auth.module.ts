@@ -6,6 +6,10 @@ import { UserModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ResetCode } from './reset-code.entity';
+import { User } from 'src/user/user.entity';
+import { PasswordRecoveryService } from './password-recovery.service';
 
 @Module({
   imports: [
@@ -26,9 +30,10 @@ import { JwtStrategy } from './jwt.strategy';
       }),
     }),
     UserModule,
+    TypeOrmModule.forFeature([ResetCode])
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [PassportModule, JwtModule],
+  providers: [AuthService, JwtStrategy, PasswordRecoveryService],
+  exports: [PassportModule, JwtModule, PasswordRecoveryService],
 })
 export class AuthModule {}
