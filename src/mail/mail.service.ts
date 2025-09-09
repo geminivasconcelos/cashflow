@@ -41,4 +41,10 @@ export class MailService {
     });
   }
   
+  sendMail(options: nodemailer.SendMailOptions) {
+    return this.transporter.sendMail({
+      from: `"Cashflow App" <${process.env.SMTP_USER}>`,
+      ...options,
+    });
+  }
 }
