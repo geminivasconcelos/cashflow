@@ -1,3 +1,5 @@
+import { DebtTrackerModule } from './debt-tracker/debt-tracker.module';
+import { DebtTrackerService } from './debt-tracker/debt-tracker.service';
 import { PasswordRecoveryService } from './auth/password-recovery.service';
 import { LiabilitiesModule } from './liabilities/liabilities.module';
 import { LiabilitiesController } from './liabilities/liabilities.controller';
@@ -23,6 +25,7 @@ import { ResetCode } from './auth/reset-code.entity';
 
 @Module({
   imports: [
+    DebtTrackerModule,
     LiabilitiesModule,
     MailModule,
     SavingsModule,
