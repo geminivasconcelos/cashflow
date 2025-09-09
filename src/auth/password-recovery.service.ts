@@ -77,8 +77,8 @@ export class PasswordRecoveryService {
     const userId = result.user ? result.user.id : payload.userId;
 
     await this.resetCodeRepository.update({ userId }, { used: true });
+    await this.resetCodeRepository.delete({ userId });
 
-    
     await this.mailService.sendMail({
       to: result.user.email,
       subject: 'Senha redefinida com sucesso',
